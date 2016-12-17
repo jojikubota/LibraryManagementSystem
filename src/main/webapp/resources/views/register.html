@@ -1,0 +1,32 @@
+<div class="row backimage" style="height:100%">
+<div class="login col-md-6 col-md-offset-3" ng-controller="loginController">
+<div class="panel panel-default" style="margin-top:80px">
+	<div class="panel-body" style="background:#fafafa"> 
+          <form id="createnewform">      
+            <label>Email ID</label><br/>
+            <input type="email" name="email" ng-model="user.username" class="form-control col-md-4" placeholder="Email ID">
+            <br/><br/>
+            <label>Password</label><br/>
+            <input type="password" name="password" ng-model="user.password" class="form-control col-md-4" placeholder="Password">
+            <br/><br/>
+             <label>First Name</label><br/>
+            <input type="text" name="firstName" ng-model="user.firstName" class="form-control col-md-4" placeholder="First Name">
+            <br/><br/>
+             <label>Last Name</label><br/>
+            <input type="text" name="lastName" ng-model="user.lastName" class="form-control col-md-4" placeholder="Last Name">
+            <br/><br/>
+             <label>University Id</label><br/>
+            <input type="text" name="lastName" maxlength="6" ng-model="user.universityId" class="form-control col-md-4" placeholder="University Id">
+            <br/><br/>
+            
+            <div class="alert alert-danger" id="errordiv" style="display: none"></div>
+            
+           <input type="submit" value="Register" class="btn btn-primary col-md-5" ng-click=register(user)>
+           <span class="col-md-1"></span>
+            <button type="button" class="btn btn-default col-md-5" data-dismiss="modal">Clear</button>
+            <br/><br/>
+          </form>
+          </div>
+          </div>
+ </div>
+ </div>

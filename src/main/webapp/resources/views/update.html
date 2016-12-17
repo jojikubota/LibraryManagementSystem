@@ -1,0 +1,66 @@
+<div class="login col-md-12" style = "margin-left:initial;" ng-controller="searchController">
+
+	<table class="table table-striped">
+		<thead>
+			<tr>
+			    <th></th>
+			    <th></th>
+				<th>Author</th>
+				<th>Title</th>
+				<th>CallNumber</th>
+				<th>Publisher</th>
+				<th>Year Of Publication</th>
+				<th>Number of Copies</th>
+				<th>Location in Libraries</th>
+				 <th></th>
+				 <th></th>
+				 <th></th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr class="row" ng-repeat="data in books.booksdata" ng-include="getTemplate(data)">
+			</tr>
+		</tbody>
+		<button type="button" class="btn btn-danger"  ng-click="deleteBook(books.booksdata)">Delete</button>
+	</table>
+	
+	<script type="text/ng-template" id="display">
+        <td ><input type="checkbox" ng-model="data.selection"> </td>
+                <td style="display:none;" ng-model="data.author">{{data.id}}</td>
+				<td  ng-model="data.author">{{data.author}}
+				</td>
+				<td ng-model="data.title">{{data.title}}
+				</td>
+				<td ng-model="data.callNumber">{{data.callNumber}}
+				</td>
+				<td ng-model="data.publisher">{{data.publisher}}
+				</td>
+				<td ng-model="data.yearOfPublication">{{data.yearOfPublication}}
+				</td>
+				<td ng-model="data.noOfCopies">{{data.noOfCopies}}
+				</td>
+				<td ng-model="data.location">{{data.location}}
+				</td>
+        <td>
+            <button class="btn btn-primary"ng-click="editBook(data)">Edit</button>
+        </td>
+    </script>
+	<script type="text/ng-template" id="edit">
+        <td></td>
+		<td style="display:none;" ng-model="data.author">{{data.id}}</td>
+        <td><input type="text" style="width:100px"  style="width:100px" ng-model="data.author" /></td>
+        <td ><input type="text" style="width:100px"  ng-model="data.title" /></td>
+ 		<td ><input type="text" style="width:100px"  ng-model="data.callNumber" /></td>
+ 		<td ><input type="text" style="width:100px"  ng-model="data.publisher" /></td>
+ 		<td ><input type="text" style="width:100px"  ng-model="data.yearOfPublication" /></td>
+ 		<td ><input type="text" style="width:100px"  ng-model="data.noOfCopies" /></td>
+		<td ><input type="text" style="width:100px"  ng-model="data.location" /></td>
+
+        <td>
+            <button class="btn btn-success" ng-click="saveBook($index)">Save</button>
+</td>
+<td>
+            <button class="btn btn-danger" ng-click="reset()">Cancel</button>
+        </td>
+    </script>
+</div>

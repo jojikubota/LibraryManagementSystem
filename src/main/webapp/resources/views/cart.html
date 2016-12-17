@@ -1,0 +1,90 @@
+<!-- <div class="login col-md-6" ng-controller="searchPatronController">
+	<form id="loginform">      
+      <label>Email ID</label><br/>
+      <input type="email" class="form-control col-md-4" ng-model="user.email" name="email" placeholder="Email ID">
+      <br/><br/>
+      <label>Password</label><br/>
+      <input type="password" class="form-control col-md-4" ng-model="user.password" name="password" placeholder="Password">
+      <button type="button" class="btn btn-info btn-block" value="Login" id="login" ng-click="login(user)">Login</button><br>
+      <button type="button" class="btn btn-info btn-block" data-toggle="modal" data-target="#myModal">Sign Up</button>    
+   </form>
+</div> -->
+
+
+
+<div class="login" ng-controller = "cartController">
+
+		<div class="container">
+			<!--  <div class="row" style="margin-top:10px">
+				<input type = "text" ng-model="searchText" class="form-control"/><br>
+				<button ng-click="searchSubmit()" class="btn btn-info active form-control">Search</button>
+			</div>  -->
+			<div class="panel panel-default">
+ 			<div class="panel-body" style="padding:30px; background:#ffffff">
+			<div class = "row" style="margin-top:15px">
+				
+			<!-- 	<table class="table table-default" ng-show="searchResults.length > 0"> -->
+				<table class="table table-stripped" >
+					<tr>
+						<th>Author</th>
+						<th>Title</th>
+						<th></th>
+					</tr>
+					
+					<tr ng-repeat="x in searchResults">
+						<td>{{x.author}}</td>
+						<td>{{x.title}}</td>
+						<td><button ng-click="addToCart(x)" class="btn btn-info btn-sm">Add to Cart</button></td>
+					</tr>
+				</table>
+				
+				<div class="row" style="margin-top:70px">
+				<div class="col-md-3">
+				<div class="panel panel-default">
+				  <div class="panel-heading">Your Cart:</div>
+				  <div class="panel-body">
+				  </div>
+				  <table class="table table-hover table-striped" >
+						<tr ng-repeat="x in cartItems">
+						<div class="col-md-6">
+							<td>{{x.title}}</td>
+						</div>
+						<div class="col-md-6">
+						<td><button ng-click="removeFromCart(x)" class="btn btn-danger btn-sm">
+								<span class="glyphicon glyphicon-trash"></span>
+							</button>
+						</td>
+						</div>
+						</tr>
+					</table>
+					<div style="padding:20px">
+						<button class="btn btn-primary btn-block" ng-click="confirmOrder()">Confirm Order</button>
+					</div>
+				</div>	
+				</div>
+				
+				<div class="col-md-4 col-md-offset-3" ng-show="confirmedItems.length > 0">
+				<div class="panel panel-default">
+				  <div class="panel-heading">Confirmed Order: </div>
+				  <div class="panel-body">
+				  </div>
+				  <table class="table table-hover table-striped" >
+				  <tr>
+						<th>Author</th>
+						<th>Title</th>
+					</tr>
+						<tr ng-repeat="x in confirmedItems">
+							<td>{{x.author}}</td>
+							<td>{{x.title}}</td>
+						</tr>
+					</table>
+				</div>	
+				</div>
+				
+				
+				</div>
+			</div>
+			</div>
+			</div>
+		</div>
+	</div>

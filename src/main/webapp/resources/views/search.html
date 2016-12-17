@@ -1,0 +1,40 @@
+<div class="login col-md-10" ng-controller="searchController">
+
+	<form class="searchbook" id="searchForm">
+		<div class="row" style="margin-left: 300px;">
+			<div class="col-md-8 col-md-offset-3">
+				<input type="text" name="searchString" id="searchString"
+					ng-model="keyword" class="form-control input-lg"
+					placeholder="Search Book by Name/Title/Librarian" style="float: left">
+				<br>
+				<br>
+				<br>
+				<button type="button" class="btn btn-primary btn-lg btn-block"
+					ng-click=search(keyword)>Search</button>
+			</div>
+
+		</div>
+	</form>
+	<!-- Welcome {{username}}! -->
+
+	<div class="modal-body row">
+		<div class="col-md-2">
+			<!-- <a href="addbook" ng-click="selection(Books)">Books</a> -->
+			<!-- <br> -->
+			<div class="panel panel-default" style="background:#fcfcfc">
+			
+			<div class="panel-body" style="height:350px">
+			<button type="button" class="btn btn-primary" ng-click=navigate()>Add Books</button>
+			</div>
+			</div>
+		</div>
+		<div class="col-md-10">
+			<div class="panel panel-default" style="background:#fafafa">
+			<div class="panel-heading"></div>
+			<div class="panel-body">
+			<div ui-view></div>
+			</div>
+			</div>
+		</div>
+	</div>
+</div>

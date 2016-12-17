@@ -1,0 +1,60 @@
+<div ng-controller="searchController">
+	<form  id="addbookform">
+	<div class="row" style="margin-top: 10px">
+		<div class = "col-md-6"> 
+	      	<input type="text" class="form-control" ng-model="book.author" name="author" placeholder="Enter Author Name">
+	      </div>
+	      <div class = "col-md-6">
+		      <!-- <label>Title</label><br/> -->
+		      <input type="text" class="form-control" ng-model="book.title" name="title" placeholder="Enter Title">
+	      </div>
+      </div>
+     <div class="row" style="margin-top: 15px">
+		<div class = "col-md-6"> 
+      <!-- <label>CallNumber</label><br/> -->
+      <input type="text" class="form-control" ng-model="book.callNo" name="callNo" placeholder="Enter Call Number">
+      </div>
+	      <div class = "col-md-6">
+      <!-- <label>Publisher</label><br/> -->
+      <input type="text" class="form-control" ng-model="book.publisher" name="publisher" placeholder="Enter Publisher">
+       </div>
+      </div>
+     <div class="row" style="margin-top: 15px">
+		<div class = "col-md-6"> 
+      <!-- <label>Year Of Publication</label><br/> -->
+      <input type="text" class="form-control col-md-4" ng-model="book.yop" name="yop" placeholder="Enter Year of publication">
+       </div>
+	      <div class = "col-md-6">
+      <!-- <label>Location in Library</label><br/> -->
+      <input type="text" class="form-control col-md-4" ng-model="book.location" name="location" placeholder="Email Location in Library">
+      </div>
+      </div>
+     <div class="row" style="margin-top: 15px">
+		<div class = "col-md-6"> 
+      <!-- <label>No Of Copies</label><br/> -->
+      <input type="text" class="form-control col-md-4" ng-model="book.noc" name="noc" placeholder="Enter No of Copies">
+      </div>
+	      <div class = "col-md-6">
+     <!--  <label>Keywords</label><br/> -->
+      <input type="text" class="form-control col-md-4" ng-model="book.keywords" name="keywords" placeholder="Enter Keywords">
+      </div>
+      </div>
+     <div class="row" style="margin-top: 15px">
+     	<div class = "col-md-6"></div>
+		<div class = "col-md-6"> 
+      
+       <!-- <label>ISBN</label><br/> -->
+      <input type="text" class="form-control col-md-4" ng-model="book.isbn" name="isbn" placeholder="Enter ISBN">
+     </div>
+     </div>
+      <div class="row" style="margin-top: 15px">
+		<div class = "col-md-6"> 
+      <button type="button" class="btn btn-info btn-block" value="add" id="add" ng-click="add(book)">Add</button><br>
+      </div>
+      <div class = "col-md-6"> 
+      <button type="button" class="btn btn-info btn-block" value="isbn" id="isbn" ng-click="addisbn(book.isbn)">Add ISBN</button><br>
+          </div>
+   </form>
+   <br><br><br>
+   <div class="alert alert-success" id="successdiv" style="display: none"></div>
+</div>
