@@ -1,6 +1,7 @@
 package edu.sjsu.cmpe275.model;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -15,6 +16,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.search.annotations.Field;
@@ -25,7 +27,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "Book")
-//@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@keywords")
+// @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class,
+// property="@keywords")
 @Indexed
 public class Book {
 
@@ -40,8 +43,6 @@ public class Book {
 	@Field
 	private String title;
 
-	
-
 	private String callNumber;
 
 	private String publisher;
@@ -54,28 +55,29 @@ public class Book {
 
 	private String status;
 
-//	@ManyToMany(mappedBy = "books", cascade = CascadeType.ALL)
-//	@JsonIgnoreProperties(value = {"books"})
-//	private List<User> waitingUserList = new LinkedList<User>();
+	@ManyToMany(cascade = { CascadeType.MERGE, CascadeType.PERSIST }, fetch = FetchType.EAGER)
+	@JoinTable(name = "User_Books", joinColumns = {
+			@JoinColumn(name = "bookId", referencedColumnName = "id") }, inverseJoinColumns = {
+					@JoinColumn(name = "userId", referencedColumnName = "id") })
+	@JsonIgnoreProperties(value = { "books" })
+	private Set<User> waitlist = new LinkedHashSet<User>();
 
-//	public List<User> getUserList() {
-//		return waitingUserList;
-//	}
-//
-//	public void setUserList(List<User> userList) {
-//		this.waitingUserList = userList;
-//	}
+	public Set<User> getWaitlist() {
+		return waitlist;
+	}
+
+	public void setWaitlist(Set<User> waitlist) {
+		this.waitlist = waitlist;
+	}
 
 	@ManyToMany(cascade = { CascadeType.MERGE, CascadeType.PERSIST }, fetch = FetchType.EAGER)
 	@JoinTable(name = "Book_Keyword", joinColumns = {
 			@JoinColumn(name = "bookId", referencedColumnName = "id") }, inverseJoinColumns = {
-			@JoinColumn(name = "keyName", referencedColumnName = "id") })
-	@JsonIgnoreProperties(value = { "books"})
-	@IndexedEmbedded	
+					@JoinColumn(name = "keyName", referencedColumnName = "id") })
+	@JsonIgnoreProperties(value = { "books" })
+	@IndexedEmbedded
 	private Set<Keywords> keywords = new HashSet<Keywords>();
-	
-	
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -104,10 +106,10 @@ public class Book {
 	@ManyToOne
 	@IndexedEmbedded
 	private User createdBy;
-	
-//	@OneToOne
-//	private User updatdBy;
-	
+
+	// @OneToOne
+	// private User updatdBy;
+
 	public User getCreatedBy() {
 		return createdBy;
 	}
@@ -204,7 +206,6 @@ public class Book {
 		this.keywords = keywords;
 	}
 
-
 	public int getId() {
 		return id;
 	}
@@ -212,12 +213,12 @@ public class Book {
 	public void setId(int id) {
 		this.id = id;
 	}
-	
+
 	public Book() {
 		super();
 		this.status = "available";
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Book [title=" + title + "]";

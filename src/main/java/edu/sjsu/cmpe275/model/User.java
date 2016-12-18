@@ -1,7 +1,10 @@
 package edu.sjsu.cmpe275.model;
 
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -16,6 +19,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -49,14 +53,20 @@ public class User {
 	private String role;
 	private String token;
 
-//    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    @JoinTable(name = "user_books",
-//    			joinColumns = { @JoinColumn(name = "user_id", referencedColumnName="id") },
-//			    inverseJoinColumns = { @JoinColumn(name = "book_id", referencedColumnName="id")}
-//			)
-//    @JsonIgnoreProperties(value = { "userList"})
-//	private List<Book> books = new LinkedList<Book>();
 	
+	@ManyToMany(mappedBy="waitlist", cascade = { CascadeType.MERGE, CascadeType.PERSIST}, fetch=FetchType.EAGER)
+	@JsonIgnoreProperties(value = { "waitlist"})
+	private Set<Book> books  = new LinkedHashSet<Book>();
+	
+	
+	public Set<Book> getBooks() {
+		return books;
+	}
+
+	public void setBooks(Set<Book> books) {
+		this.books = books;
+	}
+
 	public String getUserName() {
 		return userName;
 	}

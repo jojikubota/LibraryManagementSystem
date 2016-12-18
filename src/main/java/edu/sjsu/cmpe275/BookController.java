@@ -304,12 +304,12 @@ public class BookController {
 
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(value = "getBooksForUser", method = RequestMethod.GET, produces={"application/json"})
-	public @ResponseBody List<UserProfile> getBooksForUser(HttpServletRequest request, HttpServletResponse response, Model model) throws Exception
+	public @ResponseBody Set<UserProfile> getBooksForUser(HttpServletRequest request, HttpServletResponse response, Model model) throws Exception
 	{  
 		HttpSession session = request.getSession();
 		String userEmailAddress = (String)session.getAttribute("userEmailAddress");
 		List<Circulation> circulation = null;
-		List<UserProfile> userProfile = new ArrayList<UserProfile>();
+		Set<UserProfile> userProfile = new HashSet<UserProfile>();
 		
 		if(userEmailAddress!=null)
 		{
@@ -332,6 +332,7 @@ public class BookController {
 				
 				profile.setDueDate(dueDate);
 				profile.setFine(entry.getFine());
+				profile.setBookId(book.getId());
 				userProfile.add(profile);
 			}
 

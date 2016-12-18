@@ -56,11 +56,8 @@ public class Keywords {
 	private String name;
 
 	@ManyToMany(mappedBy="keywords", cascade = { CascadeType.MERGE, CascadeType.PERSIST}, fetch=FetchType.EAGER)
-//	@ManyToMany(mappedBy="keywords", cascade = CascadeType.ALL)
 	@ContainedIn
-	//@JsonBackReference
 	@JsonIgnoreProperties(value = { "keywords"})
-	//@JsonManagedReference
 	private Set<Book> books  = new HashSet<Book>();;
 
 	public long getId() {

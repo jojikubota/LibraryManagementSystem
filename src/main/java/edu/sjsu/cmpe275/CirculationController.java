@@ -20,12 +20,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-
-import com.google.api.services.books.Books;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import edu.sjsu.cmpe275.model.Book;
 import edu.sjsu.cmpe275.model.Circulation;
-import edu.sjsu.cmpe275.model.Keywords;
+import edu.sjsu.cmpe275.model.RenewBooks;
 import edu.sjsu.cmpe275.model.User;
 import edu.sjsu.cmpe275.service.BookService;
 import edu.sjsu.cmpe275.service.CirculationService;
@@ -89,8 +88,7 @@ public class CirculationController {
 		}
 
 		List<Circulation> entry = circulationService.getCirculationForUser(user.getId());
-		
-	
+
 		// Check the max checkout number
 		if (availableBooks.size() > (maxBooksPerPatron - entry.size())) {
 			response.setStatus(HttpStatus.BAD_REQUEST.value());
@@ -105,19 +103,22 @@ public class CirculationController {
 				java.sql.Date checkoutDate = new java.sql.Date(Calendar.getInstance().getTime().getTime());
 				circulation.setCheckoutDate(checkoutDate);
 				circulationService.createCirculation(circulation);
-				
+
 				// decrement no of copies of book
 				Book book = bookService.findOneBook(availableBooks.get(i).getId());
 
-				
 				Book temp = new Book();
 				temp.setId(book.getId());
-				temp.setNoOfCopies(book.getNoOfCopies() -1);
-				
+				temp.setNoOfCopies(book.getNoOfCopies() - 1);
+
+				if (temp.getNoOfCopies() == 0) {
+					temp.setStatus("unavailable");
+				}
+
 				bookService.updateBook(temp);
 
 			}
-		}    
+		}
 
 		// Add to waitlist
 
@@ -184,164 +185,216 @@ public class CirculationController {
 		return null;
 	}
 
-	// @RequestMapping(value = "/return", method = RequestMethod.DELETE)
-	// public void returnBook(HttpServletRequest request, Model model) throws
-	// Exception {
-	//
-	// List<Book> returningBooks = new ArrayList<Book>();
-	//
-	// // Read in the request body (Json array of 'Book')
-	// JSONArray reqBooks = new JSONArray(request.getReader());
-	// for (int i = 0; i < reqBooks.length(); i++) {
-	// JSONObject requestedBook = reqBooks.getJSONObject(i);
-	// int bookId = requestedBook.getInt("id");
-	// Book book = bookService.findOneBook(bookId);
-	// returningBooks.add(book);
-	// }
-	//
-	// // Check for fines while returning books.
-	// for (int i = 0; i < returningBooks.size(); i++) {
-	// Circulation circulation =
-	// circulationService.getCirculation(user.getUserId(),
-	// returningBooks.get(i).getBookId());
-	//
-	//// java.sql.Date checkoutDate = circulation.getCheckoutDate();
-	//// Calendar calendar = Calendar.getInstance();
-	//// calendar.setTime(checkoutDate);
-	//// calendar.add(Calendar.MONTH, 1);
-	//
-	// circulationService.deleteCirculation(circulation);
-	// }
-	//
-	// // Generate message for books returned
-	// /*** can be optimized ***/
-	// String returnedBookMessage = "You returned " + returningBooks.size() + "
-	// books.\n";
-	// for (int i = 0; i < returningBooks.size(); i++) {
-	// returnedBookMessage += "Book " + i + ":\n"
-	// + "Title: " + returningBooks.get(i).getTitle() + "\n"
-	// + "Author: " + returningBooks.get(i).getAuthor() + "\n\n";
-	// }
-	// returnedBookMessage += "Thank you for returning the books.";
-	//
-	// // Send email
-	// JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-	// mailSender.setHost("smtp.gmail.com");
-	// mailSender.setPort(587);
-	// mailSender.setUsername("cmpe275final@gmail.com");
-	// mailSender.setPassword("finalproject");
-	//
-	// Properties props = new Properties();
-	// props.put("mail.smtp.starttls.enable", "true");
-	// mailSender.setJavaMailProperties(props);
-	//
-	// MimeMessage message = mailSender.createMimeMessage();
-	// MimeMessageHelper email = new MimeMessageHelper(message);
-	// try {
-	// email.setTo(user.getEmailAddress());
-	// email.setText(returnedBookMessage);
-	// mailSender.send(message);
-	// } catch (Exception e1) {
-	// e1.printStackTrace();
-	// }
-	//
-	// // Read in the request body (Json array of 'Book')
-	//
-	// // Check for overdue fine
-	//
-	// // Remove each book from Circulation
-	//
-	// // Send confirmation email
-	// }
+	@RequestMapping(value = "/return", method = RequestMethod.DELETE)
+	public void returnBook(HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
 
-	// @RequestMapping(value = "/renew", method = RequestMethod.PUT)
-	// public void extendBook(HttpServletRequest request,
-	// HttpServletResponse response,
-	// Model model) throws Exception {
-	//
-	// // Separate renewalble vs not
-	// List<Book> renewableBooks = new ArrayList<Book>();
-	// List<Book> unrenewableBooks = new ArrayList<Book>();
-	//
-	// // Read in the request body (Json array of 'Book')
-	// JSONArray reqBooks = new JSONArray(request.getReader());
-	// for (int i = 0; i < reqBooks.length(); i++) {
-	// JSONObject requestedBook = reqBooks.getJSONObject(i);
-	// int bookId = requestedBook.getInt("id");
-	// Book book = bookService.findOneBook(bookId);
-	// // No waitlist
-	// if (book.getWaitList().size() == 0) {
-	// renewableBooks.add(book);
-	// } else { // other users waiting
-	// unrenewableBooks.add(book);
-	// }
-	// }
-	//
-	// // Reset dates
-	// for (int i = 0; i < renewableBooks.size(); i++) {
-	// Circulation circulation =
-	// circulationService.getCirculation(user.getUserId(),
-	// renewableBooks.get(i).getBookId());
-	// circulationService.resetCheckoutDate(circulation);
-	// }
-	//
-	// // Generate message for books successfully renewed
-	// /*** can be optimized ***/
-	// String renewableMessage = "You are renewing " + renewableBooks.size() + "
-	// books.\n";
-	// for (int i = 0; i < renewableBooks.size(); i++) {
-	// renewableMessage += "Book " + i + ":\n"
-	// + "Title: " + renewableBooks.get(i).getTitle() + "\n"
-	// + "Author: " + renewableBooks.get(i).getAuthor() + "\n\n";
-	// }
-	// Calendar calendar = Calendar.getInstance();
-	// calendar.add(Calendar.MONTH, 1);
-	// String dueDate = new
-	// SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime());
-	// System.out.println(dueDate);
-	// renewableMessage += "Return by " + dueDate + "\n\n";
-	//
-	// // Generate message for books placed in waitlist
-	// /*** can be optimized ***/
-	// String unrenewableMessage = "Renewal failed for " +
-	// unrenewableBooks.size() + " books.\n";
-	// for (int i = 0; i < unrenewableBooks.size(); i++) {
-	// unrenewableMessage += "Book " + i + ":\n"
-	// + "Title: " + unrenewableBooks.get(i).getTitle() + "\n"
-	// + "Author: " + unrenewableBooks.get(i).getAuthor() + "\n\n";
-	// }
-	// unrenewableMessage += "We will notify you when the books are available.";
-	//
-	// // Send the messge to the front end
-	// model.addAttribute("checkoutMessage", renewableBooks);
-	// model.addAttribute("waitlistMessage", unrenewableMessage);
-	//
-	// // Send the message via email
-	// JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-	// mailSender.setHost("smtp.gmail.com");
-	// mailSender.setPort(587);
-	// mailSender.setUsername("cmpe275final@gmail.com");
-	// mailSender.setPassword("finalproject");
-	//
-	// Properties props = new Properties();
-	// props.put("mail.smtp.starttls.enable", "true");
-	// mailSender.setJavaMailProperties(props);
-	//
-	// MimeMessage message = mailSender.createMimeMessage();
-	// MimeMessageHelper email = new MimeMessageHelper(message);
-	// try {
-	// email.setTo(user.getEmailAddress());
-	// if (renewableBooks.size() != 0 && unrenewableBooks.size() != 0) {
-	// email.setText(renewableMessage + unrenewableMessage);
-	// } else if (renewableBooks.size() != 0 && unrenewableBooks.size() == 0) {
-	// email.setText(renewableMessage);
-	// } else if (renewableBooks.size() == 0 && unrenewableBooks.size() != 0) {
-	// email.setText(unrenewableMessage);
-	// }
-	// mailSender.send(message);
-	// } catch (Exception e1) {
-	// e1.printStackTrace();
-	// }
-	// }
+		List<Integer> returningBooks = new ArrayList<Integer>();
+
+		String userEmailAddress = (String) request.getSession().getAttribute("userEmailAddress");
+		User user = userService.getUser(userEmailAddress);
+
+		List<Book> bookListForMessages = new ArrayList<Book>();
+		StringBuilder sb = new StringBuilder();
+		BufferedReader br = request.getReader();
+		String str = null;
+		while ((str = br.readLine()) != null) {
+			sb.append(str);
+		}
+		JSONObject jObj = new JSONObject(sb.toString());
+		JSONArray bookObj = jObj.getJSONArray("books");
+		if (bookObj != null) {
+			int len = bookObj.length();
+			for (int i = 0; i < len; i++) {
+				JSONObject obj = (JSONObject) bookObj.get(i);
+				returningBooks.add(obj.getInt("bookId"));
+			}
+
+			if (returningBooks.size() <= 10) { // A patron must be able to
+												// return up
+												// to 10 books in one
+												// transaction.
+
+				// Check for fines while returning books.
+				for (int i = 0; i < returningBooks.size(); i++) {
+					Circulation circulation = circulationService.getCirculation(user.getId(), returningBooks.get(i));
+
+					// java.sql.Date checkoutDate =
+					// circulation.getCheckoutDate();
+					// Calendar calendar = Calendar.getInstance();
+					// calendar.setTime(checkoutDate);
+					// calendar.add(Calendar.MONTH, 1);
+
+					circulationService.deleteCirculation(circulation);
+
+					// Increment Book number of copies
+					Book book = bookService.findOneBook(returningBooks.get(i));
+
+					bookListForMessages.add(book);
+					Book temp = new Book();
+					temp.setId(book.getId());
+					temp.setNoOfCopies(book.getNoOfCopies() + 1);
+
+					bookService.updateBook(temp);
+
+				}
+
+				// Generate message for books returned
+				/*** can be optimized ***/
+				String returnedBookMessage = "You returned following books.\n";
+				for (int i = 0; i < bookListForMessages.size(); i++) {
+					returnedBookMessage += "Title: " + bookListForMessages.get(i).getTitle() + "\n" + "Author: "
+							+ bookListForMessages.get(i).getAuthor() + "\n\n";
+				}
+				Calendar calendar = Calendar.getInstance();
+				returnedBookMessage += "Time: " + calendar.getTime();
+				returnedBookMessage += "Thank you for returning the books.";
+
+				// Send email
+				JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+				mailSender.setHost("smtp.gmail.com");
+				mailSender.setPort(587);
+				mailSender.setUsername("cmpe275final@gmail.com");
+				mailSender.setPassword("finalproject");
+
+				Properties props = new Properties();
+				props.put("mail.smtp.starttls.enable", "true");
+				mailSender.setJavaMailProperties(props);
+
+				MimeMessage message = mailSender.createMimeMessage();
+				MimeMessageHelper email = new MimeMessageHelper(message);
+				try {
+					email.setTo(user.getEmailAddress());
+					email.setText(returnedBookMessage);
+					mailSender.send(message);
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			} else {
+				response.sendError(400);
+			}
+		}
+	}
+
+	@RequestMapping(value = "/renew", method = RequestMethod.POST)
+	public @ResponseBody List<RenewBooks> extendBook(HttpServletRequest request, HttpServletResponse response,
+			Model model) throws Exception {
+
+		String userEmailAddress = (String) request.getSession().getAttribute("userEmailAddress");
+		User user = userService.getUser(userEmailAddress);
+		List<RenewBooks> list = new ArrayList<RenewBooks>();
+		// Separate renewalble vs not
+		List<Book> renewableBooks = new ArrayList<Book>();
+		List<Book> unrenewableBooks = new ArrayList<Book>();
+		List<Book> renewedCoundExceedBooks = new ArrayList<Book>();
+
+		StringBuilder sb = new StringBuilder();
+		BufferedReader br = request.getReader();
+		String str = null;
+		while ((str = br.readLine()) != null) {
+			sb.append(str);
+		}
+		JSONObject jObj = new JSONObject(sb.toString());
+		JSONArray bookObj = jObj.getJSONArray("books");
+		if (bookObj != null) {
+			int len = bookObj.length();
+			for (int i = 0; i < len; i++) {
+				JSONObject obj = (JSONObject) bookObj.get(i);
+				int bookId = obj.getInt("bookId");
+				Book book = bookService.findOneBook(bookId);
+				// No waitlist
+				if (book.getWaitlist().size() == 0) {
+					renewableBooks.add(book);
+				} else { // other users waiting
+					unrenewableBooks.add(book);
+				}
+			}
+
+			// Reset dates
+			for (int i = 0; i < renewableBooks.size(); i++) {
+				Circulation circulation = circulationService.getCirculation(user.getId(),
+						renewableBooks.get(i).getBookId());
+				if (circulation.getCountOfRenewal() == 2) {
+					renewableBooks.remove(i);
+					Book book = bookService.findOneBook(circulation.getBookId());
+					renewedCoundExceedBooks.add(book);
+
+				} else {
+					circulation.setCountOfRenewal(circulation.getCountOfRenewal() + 1);
+					circulationService.resetCheckoutDate(circulation);
+				}
+			}
+
+			// Generate message for books successfully renewed
+			/*** can be optimized ***/
+			String renewableMessage = "You are renewing following books.\n";
+			for (int i = 0; i < renewableBooks.size(); i++) {
+				renewableMessage += "Book Title: " + renewableBooks.get(i).getTitle() + "\n" + "Author: "
+						+ renewableBooks.get(i).getAuthor() + "\n\n";
+			}
+			Calendar calendar = Calendar.getInstance();
+			calendar.add(Calendar.MONTH, 1);
+			String dueDate = new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime());
+			System.out.println(dueDate);
+			renewableMessage += "Return by " + dueDate + "\n\n";
+
+			// Generate message for books placed in waitlist
+			/*** can be optimized ***/
+			String unrenewableMessage = "Renewal failed for following books.\n";
+			for (int i = 0; i < unrenewableBooks.size(); i++) {
+				unrenewableMessage += "Book Title: " + unrenewableBooks.get(i).getTitle() + "\n" + "Author: "
+						+ unrenewableBooks.get(i).getAuthor() + "\n\n";
+			}
+			unrenewableMessage += "We will notify you when the books are available.";
+
+			RenewBooks checkout = new RenewBooks();
+			checkout.setMessageString("checkoutMessage");
+			checkout.setRenewableBooks(renewableBooks);
+
+			RenewBooks waiting = new RenewBooks();
+			waiting.setMessageString("waitlistMessage");
+			waiting.setRenewableBooks(unrenewableBooks);
+
+			RenewBooks renewcount = new RenewBooks();
+			checkout.setMessageString("renewCountExceedMessage");
+			checkout.setRenewableBooks(renewedCoundExceedBooks);
+
+			list.add(checkout);
+			list.add(waiting);
+			list.add(renewcount);
+
+			String renewableCountExceededMessage = "Renewal failed for following books as you already renewed it 2 times.\n";
+			for (int i = 0; i < renewedCoundExceedBooks.size(); i++) {
+				renewableCountExceededMessage += "Book Title: " + renewedCoundExceedBooks.get(i).getTitle() + "\n"
+						+ "Author: " + renewedCoundExceedBooks.get(i).getAuthor() + "\n\n";
+			}
+
+			// Send the message via email
+			JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+			mailSender.setHost("smtp.gmail.com");
+			mailSender.setPort(587);
+			mailSender.setUsername("cmpe275final@gmail.com");
+			mailSender.setPassword("finalproject");
+
+			Properties props = new Properties();
+			props.put("mail.smtp.starttls.enable", "true");
+			mailSender.setJavaMailProperties(props);
+
+			MimeMessage message = mailSender.createMimeMessage();
+			MimeMessageHelper email = new MimeMessageHelper(message);
+			try {
+				email.setTo(user.getEmailAddress());
+				if (renewableBooks.size() > 0)
+					email.setText(renewableMessage);
+				if (unrenewableBooks.size() > 0)
+					email.setText(unrenewableMessage);
+				if (renewedCoundExceedBooks.size() > 0)
+					email.setText(renewableCountExceededMessage);
+				mailSender.send(message);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		}
+		return list;
+	}
 
 }

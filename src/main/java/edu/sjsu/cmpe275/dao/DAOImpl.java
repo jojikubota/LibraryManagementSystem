@@ -216,6 +216,8 @@ public class DAOImpl implements DAO {
 			return false;
 		}
 		temp.setCheckoutDate(renewedDate);
+		temp.setCountOfRenewal(circulation.getCountOfRenewal());
+		entitymanager.merge(temp);
 		entitymanager.getTransaction().commit();
 		entitymanager.close();
 
