@@ -2,7 +2,6 @@ package edu.sjsu.cmpe275;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -123,25 +122,6 @@ public class BookController {
 				i++;
 			}
 		    return res;
-		    
-		    
-		    
-//		    List<Book> list = new ArrayList<Book>();
-//		   	for(Book book1 : res)
-//		   	{
-//		   		Book temp = new Book();
-//		   		temp.setAuthor(book1.getAuthor());
-//		   		temp.setBookId(book1.getBookId());
-//		   		temp.setCallNumber(book1.getCallNumber());
-//		   		temp.setLocation(book1.getLocation());
-//		   		temp.setNoOfCopies(book1.getNoOfCopies());
-//		   		temp.setPublisher(book1.getPublisher());
-//		   		temp.setYearOfPublication(book1.getYearOfPublication());
-//		   		temp.setTitle(book1.getTitle());
-//		   		list.add(temp);
-//		   	}
-			
-//		    return list;
 	        
 	}
 	

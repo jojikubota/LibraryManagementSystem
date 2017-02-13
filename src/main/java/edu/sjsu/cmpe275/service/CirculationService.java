@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import edu.sjsu.cmpe275.dao.DAO;
 import edu.sjsu.cmpe275.dao.DAOImpl;
-import edu.sjsu.cmpe275.model.Book;
 import edu.sjsu.cmpe275.model.Circulation;
 
 /**
@@ -47,9 +46,23 @@ public class CirculationService implements ICirculationService {
     }
 
     @Override
-    public boolean resetCheckoutDate(Circulation circulation) {
-        java.sql.Date renewedDate = new java.sql.Date(Calendar.getInstance().getTime().getTime());
-
+    public boolean resetCheckoutDate(Circulation circulation,java.sql.Timestamp renewedDate) {
         return dao.resetCheckoutDate(circulation, renewedDate);
     }
+    
+    @Override
+    public List<Circulation> getAllCirculations() {
+        return dao.getAllCirculations();
+    }
+    
+    @Override
+    public boolean updateCirculation(Circulation circulation) {
+    	return dao.updateCirculation(circulation);
+    }
+    
+    @Override
+    public boolean setEmailTag() {
+    	return dao.updateCirculationEmailTag();
+    }
+    
 }

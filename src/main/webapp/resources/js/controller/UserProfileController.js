@@ -28,7 +28,26 @@ app.controller('userProfileController',["$scope", "$http","$window","$state","$s
 		        
 		    })
 		    .then(function(response) {
-	    	    	$scope.searchResults =  JSON.stringify(response.data);
+		    	
+		    	
+		    	$http({
+			        url: 'getBooksForUser',
+			        method: "GET",
+			        headers: {
+			            'Content-Type': 'application/json'
+			        }
+			        
+			    })
+			    .then(function(response) {
+		    	    	$scope.searchResults =  JSON.stringify(response.data);
+		    	    	$state.go("userprofile", { books: $scope.searchResults});
+			    }, 
+			    function(response) { // optional
+			    //	$scope.reset();
+			    });
+		    	
+		    	
+	    	   // 	$scope.searchResults =  JSON.stringify(response.data);
 	    	    	//$state.go("userprofile", { books: $scope.searchResults});
 		    }, 
 		    function(response) { // optional
@@ -60,8 +79,40 @@ app.controller('userProfileController',["$scope", "$http","$window","$state","$s
 		        
 		    })
 		    .then(function(response) {
-	    	    	$scope.searchResults =  JSON.stringify(response.data);
-	    	    //	$state.go("userprofile", { books: $scope.searchResults});
+		   	
+		    	$http({
+			        url: 'getBooksForUser',
+			        method: "GET",
+			        headers: {
+			            'Content-Type': 'application/json'
+			        }
+			        
+			    })
+			    .then(function(response) {
+		    	    	$scope.searchResults =  JSON.stringify(response.data);
+		    	    	$state.go("userprofile", { books: $scope.searchResults});
+			    }, 
+			    function(response) { // optional
+			    //	$scope.reset();
+			    });
+		   	 
+		   	 
+	    	 //   	$scope.searchResults =  JSON.stringify(response.data);
+	    	  //  	$scope.data = response.data
+	    	    	$scope.message = "";
+	    	    	
+	    	    	if($scope.data[0].renewableBooks.length > 0)
+	    	    		{
+	    	    		$scope.message += $scope.data[0].messageString;
+	    	    		}
+	    	    	if($scope.data[1].renewableBooks.length > 0)
+	    	    		{
+	    	    		$scope.message += $scope.data[0].messageString;
+	    	    		}
+	    	    	if($scope.data[2].renewableBooks.length > 0)
+	    	    		{
+	    	    		$scope.message += $scope.data[0].messageString;
+	    	    		}
 		    }, 
 		    function(response) { // optional
 		    //	$scope.reset();

@@ -1,5 +1,6 @@
 package edu.sjsu.cmpe275.dao;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -14,7 +15,9 @@ import org.hibernate.search.query.dsl.QueryBuilder;
 import edu.sjsu.cmpe275.model.Book;
 import edu.sjsu.cmpe275.model.Circulation;
 import edu.sjsu.cmpe275.model.Keywords;
+import edu.sjsu.cmpe275.model.TimeModel;
 import edu.sjsu.cmpe275.model.User;
+import org.springframework.transaction.annotation.Transactional;
 
 public class DAOImpl implements DAO {
 
@@ -101,6 +104,8 @@ public class DAOImpl implements DAO {
 		
 		if(book.getTitle()!=null)
 			temp.setTitle(book.getTitle());
+		
+		temp.setWaitlist(book.getWaitlist());
 		
 		temp.setNoOfCopies(book.getNoOfCopies());
 		
@@ -206,7 +211,7 @@ public class DAOImpl implements DAO {
 	}
 
 	@Override
-	public boolean resetCheckoutDate(Circulation circulation, java.sql.Date renewedDate) {
+	public boolean resetCheckoutDate(Circulation circulation, java.sql.Timestamp renewedDate) {
 		EntityManager entitymanager = emfactory.createEntityManager();
 		entitymanager.getTransaction().begin();
 
@@ -327,6 +332,121 @@ public class DAOImpl implements DAO {
 		entitymanager.getTransaction().commit();
 		entitymanager.close();
 		
+		return true;
+	}
+	
+	@Override
+	public void setDateTime(TimeModel date) {
+		// TODO Auto-generated method stub
+		EntityManager entitymanager = emfactory.createEntityManager();
+		entitymanager.getTransaction().begin();
+		entitymanager.merge(date);
+		entitymanager.getTransaction().commit();
+		entitymanager.close();
+	}
+	
+	@Override
+	public TimeModel getDateTime() {
+		// TODO Auto-generated method stub
+		EntityManager entitymanager = emfactory.createEntityManager();
+		//Query query = entitymanager.createQuery("select s from settime s where s.id=1");
+		TimeModel s = entitymanager.find(TimeModel.class, 1);
+		//setTime s = (setTime) query.getSingleResult();
+		entitymanager.close();
+		return s;
+	}
+	
+	@Override
+	public void updateDateTime(Timestamp date) {
+		
+		EntityManager entitymanager = emfactory.createEntityManager();		
+		entitymanager.getTransaction().begin();
+		
+		TimeModel temp = entitymanager.find(TimeModel.class, 1);	
+			
+		temp.setDate(date);
+	    entitymanager.merge(temp);
+		
+		entitymanager.getTransaction().commit();
+		entitymanager.close();
+	}
+	
+	@Override
+	public List<Circulation> getAllCirculations() {
+		EntityManager entitymanager = emfactory.createEntityManager();
+		Query query = entitymanager.createQuery("SELECT c from Circulation c");
+		List<Circulation> circulation =  (List<Circulation>) query.getResultList();
+		entitymanager.close();
+
+		return circulation;
+	}
+	
+	@Override
+	public User getUser(int userId) {
+		EntityManager entitymanager = emfactory.createEntityManager();
+		Query query = entitymanager.createQuery("SELECT u from User u where u.id='" + userId +"'");
+		User user = (User) query.getSingleResult();
+		entitymanager.close();
+		return user;
+	}
+	
+	@Override
+	public List<User> getAllUsers() {
+		EntityManager entitymanager = emfactory.createEntityManager();
+		Query query = entitymanager.createQuery("SELECT u from User u");
+		List<User> users =  (List<User>) query.getResultList();
+		entitymanager.close();
+
+		return users;
+	}
+	
+	@Override
+	public boolean updateBooksOnHold(User user) {
+
+		EntityManager entitymanager = emfactory.createEntityManager();
+		entitymanager.getTransaction().begin();
+
+		User temp = entitymanager.find(User.class, user.getId());
+
+		if (temp == null) {
+			return false;
+		}
+		temp.setBooksOnHold(user.getBooksOnHold());
+		entitymanager.merge(temp);
+		entitymanager.getTransaction().commit();
+		entitymanager.close();
+		return true;
+	}
+	
+	@Override
+	public boolean updateCirculation(Circulation circulation) {
+
+		EntityManager entitymanager = emfactory.createEntityManager();
+		entitymanager.getTransaction().begin();
+
+		Circulation temp = entitymanager.find(Circulation.class, circulation.getId());
+
+		if (temp == null) {
+			return false;
+		}
+		temp.setFine(circulation.getFine());
+		temp.setEmailSent(circulation.getEmailSent());
+		entitymanager.merge(temp);
+		entitymanager.getTransaction().commit();
+		entitymanager.close();
+		return true;
+	}
+	
+	@Override
+	@Transactional
+	public boolean updateCirculationEmailTag() {
+		EntityManager entitymanager = emfactory.createEntityManager();
+		entitymanager.getTransaction().begin();
+		Query query = entitymanager.createQuery("UPDATE Circulation c SET c.emailSent = false");
+		query.executeUpdate();
+		entitymanager.getTransaction().commit();
+		entitymanager.close();
+
 		return true;
 	}
 

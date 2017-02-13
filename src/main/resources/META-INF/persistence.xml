@@ -15,6 +15,7 @@
 			<property name="hibernate.format_sql" value="true" />
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />
 			<property name="hibernate.hbm2ddl.auto" value="update" />
+			<property name="hibernate.event.merge.entity_copy_observer" value="allow"/>
 			
 			<!-- Configuring Connection Pool -->
 			<property name="hibernate.c3p0.min_size" value="20000" /> 

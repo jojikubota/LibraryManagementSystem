@@ -22,23 +22,7 @@ app.controller('cartController',["$scope", "$http","$window","$state","$statePar
     	else
     		$scope.cartItems.push(item);
     	
-    	var data = {data :$scope.cartItems}
-//		 $http({
-//	  	        url: 'checkout',
-//	  	        method: "POST",
-//	  	        headers: {
-//	  	            'Content-Type': 'application/json'
-//	  	        },
-//	  	        data: { 'checkout':data}
-//	  	        
-//	  	    })
-//	  	    .then(function(response) {
-//	  	    	   alert("added");
-//	  	    }, 
-//	  	    function(response) { // optional
-//	  	    	alert("no"+response);
-//	  	    });
-    	
+    	var data = {data :$scope.cartItems}    	
     	
     };
     
@@ -67,8 +51,18 @@ app.controller('cartController',["$scope", "$http","$window","$state","$statePar
 	  	    })
 	  	    .then(function(response) {
 	  	    	 var aa = JSON.stringify(response.data);
-	  	    	//$scope.confirmedItems
-	  	    	   alert("added");
+	  	    	 if(response.data.key == "waiting" && response.data.message != undefined)
+	  	    		 {
+	  	    		  if(response.data.message.length > 0)
+	  	    			  {
+	  	    			  alert(response.data.message);
+	  	    			  }
+	  	    		 }
+	  	    	 else
+	  	    		 { 
+	  	    		alert("added"); 
+	  	    		}
+	  	    	   
 	  	    }, 
 	  	    function(response) { // optional
 	  	    	alert("no"+response);

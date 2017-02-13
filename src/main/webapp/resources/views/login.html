@@ -5,10 +5,10 @@
 	<div class="panel-body" style="background:#fafafa"> 
 	<form id="loginform">      
       <label>Email ID</label><br/>
-      <input type="email" class="form-control col-md-4" ng-model="user.email" name="email" placeholder="Email ID">
+      <input type="email" class="form-control col-md-4" ng-model="user.email" name="email" placeholder="Email ID" required="required">
       <br/><br/>
       <label>Password</label><br/>
-      <input type="password" class="form-control col-md-4" ng-model="user.password" name="password" placeholder="Password">
+      <input type="password" class="form-control col-md-4" ng-model="user.password" name="password" placeholder="Password" required="required">
       <br/><br/><br/>
       <button type="button" class="btn btn-info btn-block" value="Login" id="login" ng-click="login(user)">Login</button><br>
       

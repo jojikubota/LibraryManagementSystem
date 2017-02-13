@@ -1,25 +1,27 @@
 package edu.sjsu.cmpe275.model;
 
-import java.util.HashSet;
+import java.sql.Date;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.hibernate.search.annotations.ContainedIn;
+import org.hibernate.annotations.Fetch;
 import org.hibernate.search.annotations.Field;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -52,18 +54,26 @@ public class User {
 	private boolean status;
 	private String role;
 	private String token;
+	
+	@ElementCollection(fetch = FetchType.EAGER)
+	@CollectionTable(name = "BOOKS_ONHOLD")
+	@MapKeyColumn(name = "BOOK_ID")
+	@Column(name = "DAYS_LEFT")
+	
+	private Map<Integer, java.sql.Date> booksOnHold;
+	
 
 	
-	@ManyToMany(mappedBy="waitlist", cascade = { CascadeType.MERGE, CascadeType.PERSIST}, fetch=FetchType.EAGER)
+	@ManyToMany(mappedBy="waitlist", cascade = { CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE}, fetch=FetchType.EAGER)
 	@JsonIgnoreProperties(value = { "waitlist"})
-	private Set<Book> books  = new LinkedHashSet<Book>();
+	private List<Book> books  = new ArrayList<Book>();
 	
 	
-	public Set<Book> getBooks() {
+	public List<Book> getBooks() {
 		return books;
 	}
 
-	public void setBooks(Set<Book> books) {
+	public void setBooks(List<Book> books) {
 		this.books = books;
 	}
 
@@ -182,12 +192,20 @@ public class User {
 
 	@Override
 	public String toString() {
-		return "User [emailAddress=" + emailAddress + ", userName=" + userName + "]";
+		return "User";
 	}
 
 	public User() {
 		super();
 		this.status = false;
+	}
+	
+	public Map<Integer, java.sql.Date> getBooksOnHold() {
+		return booksOnHold;
+	}
+
+	public void setBooksOnHold(Map<Integer, Date> booksOnHold) {
+		this.booksOnHold = booksOnHold;
 	}
 
 }

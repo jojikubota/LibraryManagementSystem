@@ -5,7 +5,6 @@
 		<div class="panel panel-default">
 			<div class="panel-body" style="padding: 30px; background: #ffffff">
 				<div class="row" style="margin-top: 15px">
-					{{books}}
 
 					<!-- 	<table class="table table-default" ng-show="searchResults.length > 0"> -->
 					<table class="table table-stripped">
@@ -15,6 +14,7 @@
 							<th>Title</th>
 							<th>Checkout Date</th>
 							<th>Due Date</th>
+							<th>Fine($)</th>
 							<th></th>
 						</tr>
 
@@ -23,15 +23,17 @@
 							</td>
 							<td>{{book.author}}</td>
 							<td>{{book.title}}</td>
-							<td>{{book.checkoutDate}}</td>
-							<td>{{book.dueDate}}</td>
+							<td>{{book.checkoutDate | date}}</td>
+							<td>{{book.dueDate | date}}</td>
+							<td>{{book.fine}}</td>
 						</tr>
 						<div>
 							<button class="btn btn-primary btn-block"
 								ng-click="renewSelectedBooks(books)">Renew</button>
 							<button class="btn btn-primary btn-block"
 								ng-click="returnSelectedBooks(books)">Return</button>
-						</div>
+							</td>	
+						</tr>
 					</table>
 
 				</div>

@@ -2,7 +2,6 @@ package edu.sjsu.cmpe275.service;
 
 import java.util.List;
 
-import edu.sjsu.cmpe275.model.Book;
 import edu.sjsu.cmpe275.model.Circulation;
 
 /**
@@ -16,7 +15,13 @@ public interface ICirculationService {
 
     public boolean deleteCirculation(Circulation circulation);
 
-    public boolean resetCheckoutDate(Circulation circulation);
+    public boolean resetCheckoutDate(Circulation circulation,java.sql.Timestamp date);
     
     public List<Circulation> getCirculationForUser(int userId);
+    
+    public List<Circulation> getAllCirculations();
+    
+    public boolean updateCirculation(Circulation circulation);
+    
+    public boolean setEmailTag();
 }

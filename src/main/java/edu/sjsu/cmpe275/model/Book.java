@@ -1,8 +1,7 @@
 package edu.sjsu.cmpe275.model;
 
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -16,13 +15,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.IndexedEmbedded;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -55,18 +55,20 @@ public class Book {
 
 	private String status;
 
-	@ManyToMany(cascade = { CascadeType.MERGE, CascadeType.PERSIST }, fetch = FetchType.EAGER)
+	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE }, fetch = FetchType.EAGER)
 	@JoinTable(name = "User_Books", joinColumns = {
-			@JoinColumn(name = "bookId", referencedColumnName = "id") }, inverseJoinColumns = {
+					@JoinColumn(name = "bookId", referencedColumnName = "id") }, 
+					inverseJoinColumns = {
 					@JoinColumn(name = "userId", referencedColumnName = "id") })
-	@JsonIgnoreProperties(value = { "books" })
-	private Set<User> waitlist = new LinkedHashSet<User>();
+	@OrderColumn(name="emailAddress")
+	@JsonIgnore
+	private List<User> waitlist = new ArrayList<User>();
 
-	public Set<User> getWaitlist() {
+	public List<User> getWaitlist() {
 		return waitlist;
 	}
 
-	public void setWaitlist(Set<User> waitlist) {
+	public void setWaitlist(List<User> waitlist) {
 		this.waitlist = waitlist;
 	}
 
@@ -78,11 +80,12 @@ public class Book {
 	@IndexedEmbedded
 	private Set<Keywords> keywords = new HashSet<Keywords>();
 
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((title == null) ? 0 : title.hashCode());
+		result = prime * result + id;
 		return result;
 	}
 
@@ -95,10 +98,7 @@ public class Book {
 		if (getClass() != obj.getClass())
 			return false;
 		Book other = (Book) obj;
-		if (title == null) {
-			if (other.title != null)
-				return false;
-		} else if (!title.equals(other.title))
+		if (id != other.id)
 			return false;
 		return true;
 	}

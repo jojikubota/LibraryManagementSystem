@@ -5,7 +5,7 @@ public class UserProfile {
 	private int bookId;
 	private String author;
 	private String title;
-	private java.sql.Date checkoutDate;
+	private java.sql.Timestamp checkoutDate;
 	private String dueDate;
 	private int fine;
 	
@@ -29,10 +29,10 @@ public class UserProfile {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	public java.sql.Date getCheckoutDate() {
+	public java.sql.Timestamp getCheckoutDate() {
 		return checkoutDate;
 	}
-	public void setCheckoutDate(java.sql.Date checkoutDate) {
+	public void setCheckoutDate(java.sql.Timestamp checkoutDate) {
 		this.checkoutDate = checkoutDate;
 	}
 	public String getDueDate() {

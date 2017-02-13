@@ -1,7 +1,7 @@
 package edu.sjsu.cmpe275.model;
 
 import javax.persistence.*;
-import java.sql.Date;
+import java.sql.Timestamp;
 
 /**
  * Created by joji on 12/6/16.
@@ -16,9 +16,10 @@ public class Circulation {
     private int id;
     private int userId;
     private int bookId;
-    private java.sql.Date checkoutDate;
+    private java.sql.Timestamp checkoutDate;
     private int countOfRenewal;
     private int fine;
+    private Boolean emailSent = false;
 
     @Override
 	public String toString() {
@@ -50,11 +51,11 @@ public class Circulation {
         this.bookId = bookId;
     }
 
-    public Date getCheckoutDate() {
+    public Timestamp getCheckoutDate() {
         return checkoutDate;
     }
 
-    public void setCheckoutDate(Date checkoutDate) {
+    public void setCheckoutDate(Timestamp checkoutDate) {
         this.checkoutDate = checkoutDate;
     }
 
@@ -72,6 +73,13 @@ public class Circulation {
 
     public void setFine(int fine) {
         this.fine = fine;
+    }
+    public Boolean getEmailSent() {
+        return emailSent;
+    }
+
+    public void setEmailSent(Boolean emailSent) {
+        this.emailSent = emailSent;
     }
 }
 

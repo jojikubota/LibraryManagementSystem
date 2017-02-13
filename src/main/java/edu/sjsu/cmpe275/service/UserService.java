@@ -1,16 +1,17 @@
 package edu.sjsu.cmpe275.service;
 
+import java.util.List;
 import java.util.Properties;
 
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
 
 import edu.sjsu.cmpe275.dao.DAO;
 import edu.sjsu.cmpe275.dao.DAOImpl;
 import edu.sjsu.cmpe275.model.User;
-import org.springframework.stereotype.Service;
 
 @Service
 public class UserService implements IUserService {
@@ -102,6 +103,29 @@ public class UserService implements IUserService {
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
+	}
+	
+	@Override
+	public User getUser(int userId) throws Exception {
+
+		User result = dao.getUser(userId);
+
+		if (result == null) {
+			System.out.println("COULD NOT FIND USER");
+
+		}
+
+		return result;
+	}
+	
+	@Override
+	public List<User> getAllUsers() {
+		return dao.getAllUsers();
+	}
+	
+	@Override
+	public boolean updateBooksOnHold(User user) {
+		return dao.updateBooksOnHold(user);
 	}
 
 }

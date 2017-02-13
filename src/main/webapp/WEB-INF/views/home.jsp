@@ -79,8 +79,12 @@
       </ul>
       
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="/register">Sign up</a></li>
-        <li><a href="/login">Login</a></li>
+        <li><a href="#/register">Sign up</a></li>
+        <li><a href="#/login">Login</a></li>
+       <li> 
+       <input type="datetime-local"  ng-model="timeValue.value">
+       <button ng-click="setAppTime()">Set Date</button>
+       </li>
         
       </ul>
     </div><!-- /.navbar-collapse -->

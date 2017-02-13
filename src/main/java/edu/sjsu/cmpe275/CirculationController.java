@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
@@ -25,11 +27,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import edu.sjsu.cmpe275.model.Book;
 import edu.sjsu.cmpe275.model.Circulation;
 import edu.sjsu.cmpe275.model.RenewBooks;
+import edu.sjsu.cmpe275.model.TimeModel;
 import edu.sjsu.cmpe275.model.User;
+import edu.sjsu.cmpe275.model.UserModel;
 import edu.sjsu.cmpe275.service.BookService;
 import edu.sjsu.cmpe275.service.CirculationService;
+import edu.sjsu.cmpe275.service.DateService;
 import edu.sjsu.cmpe275.service.IBookService;
 import edu.sjsu.cmpe275.service.ICirculationService;
+import edu.sjsu.cmpe275.service.IDateService;
 import edu.sjsu.cmpe275.service.IUserService;
 import edu.sjsu.cmpe275.service.UserService;
 
@@ -43,13 +49,14 @@ public class CirculationController {
 	// @Autowired
 	IBookService bookService = new BookService();
 	IUserService userService = new UserService();
+	IDateService dateService = new DateService();
 	// @Autowired
 	ICirculationService circulationService = new CirculationService();
 	int maxBooksPerPatron = 10;
 	// User user = new User();
 
 	@RequestMapping(value = "/checkout", method = RequestMethod.POST)
-	public String checkoutBook(HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
+	public @ResponseBody UserModel checkoutBook(HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
 
 		// Separate immediately available vs wait list
 		List<Book> availableBooks = new ArrayList<Book>();
@@ -93,14 +100,25 @@ public class CirculationController {
 		if (availableBooks.size() > (maxBooksPerPatron - entry.size())) {
 			response.setStatus(HttpStatus.BAD_REQUEST.value());
 			model.addAttribute("message", "Cannot keep more than 10 books at a time");
-			return "bad request";
+			//return "bad request";
 		} else { // Checkout
 			for (int i = 0; i < availableBooks.size(); i++) {
 				// Persist the transaction
 				Circulation circulation = new Circulation();
 				circulation.setUserId(user.getId());
 				circulation.setBookId(availableBooks.get(i).getId());
-				java.sql.Date checkoutDate = new java.sql.Date(Calendar.getInstance().getTime().getTime());
+				
+				TimeModel timeModel = (TimeModel)dateService.getTime();
+				java.sql.Timestamp checkoutDate;
+				if(timeModel != null)
+				{
+					 java.util.Date utilDate = timeModel.getDate();
+					 checkoutDate = new java.sql.Timestamp(utilDate.getTime());
+				}
+				else
+				{
+					checkoutDate = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());	
+				}
 				circulation.setCheckoutDate(checkoutDate);
 				circulationService.createCirculation(circulation);
 
@@ -121,12 +139,25 @@ public class CirculationController {
 		}
 
 		// Add to waitlist
-
-		// ------------ check later on----------------
-		// for (int i = 0; i < unavailableBooks.size(); i++) {
-		//
-		// unavailableBooks.get(i).getWaitList().add(user);
-		// }
+		for (Book unavailableBook : unavailableBooks) {
+			Book obj = new Book();
+			obj.setAuthor(unavailableBook.getAuthor());
+			obj.setBookId(unavailableBook.getBookId());
+			obj.setCallNumber(unavailableBook.getCallNumber());
+			obj.setCreatedBy(unavailableBook.getCreatedBy());
+			obj.setId(unavailableBook.getId());
+			obj.setISBN(unavailableBook.getISBN());
+			obj.setKeywords(unavailableBook.getKeywords());
+			obj.setNoOfCopies(unavailableBook.getNoOfCopies());
+			obj.setLocation(unavailableBook.getLocation());
+			obj.setPublisher(unavailableBook.getPublisher());
+			obj.setTitle(unavailableBook.getTitle());
+			obj.setStatus(unavailableBook.getStatus());
+			List<User> temps = unavailableBook.getWaitlist();
+			temps.add(user);
+			obj.setWaitlist(temps);
+			bookService.updateBook(obj);
+		}
 
 		// Generate message for books successfully checked out
 		/*** can be optimized ***/
@@ -135,27 +166,46 @@ public class CirculationController {
 			checkoutMessage += "Book " + i + 1 + ":\n" + "Title: " + availableBooks.get(i).getTitle() + "\n"
 					+ "Author: " + availableBooks.get(i).getAuthor() + "\n\n";
 		}
+		
+		// Capture app date and time from widget
+		TimeModel timeModel = (TimeModel)dateService.getTime();
+		java.sql.Date date;
+		if(timeModel != null)
+		{
+			 java.util.Date utilDate = timeModel.getDate();
+			 date = new java.sql.Date(utilDate.getTime());
+		}
+		else
+		{
+			date = new java.sql.Date(Calendar.getInstance().getTime().getTime());	
+		}
+		
+		
 		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
 		calendar.add(Calendar.MONTH, 1);
 		String dueDate = new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime());
 		System.out.println(dueDate);
 		checkoutMessage += "Return by " + dueDate + "\n\n";
+		String waitlistMessage = null;
 
-		// Generate message for books placed in waitlist
+		if(unavailableBooks.size() > 0)
+		{
 		/*** can be optimized ***/
-		// String waitlistMessage = "You are placed in wait list for " +
-		// availableBooks.size() + " books.\n";
-		// for (int i = 0; i < unavailableBooks.size(); i++) {
-		// waitlistMessage += "Book " + i + ":\n"
-		// + "Title: " + availableBooks.get(i).getTitle() + "\n"
-		// + "Author: " + availableBooks.get(i).getAuthor() + "\n\n";
-		// }
-		// waitlistMessage += "We will notify you when the books are
-		// available.";
+		 waitlistMessage = "You are placed in wait list for "
+		 							+ unavailableBooks.size() + " books.\n";
+		 for (int i = 0; i < unavailableBooks.size(); i++) {
+			 waitlistMessage += "Book " + i + ":\n"
+			 + "Title: " + unavailableBooks.get(i).getTitle() + "\n"
+			 + "Author: " + unavailableBooks.get(i).getAuthor() + "\n\n";
+		 }
+		 waitlistMessage += "We will notify you when the books are available.";
+		 
+		}
 
 		// Send the messge to the front end
 		model.addAttribute("checkoutMessage", checkoutMessage);
-		// model.addAttribute("waitlistMessage", waitlistMessage);
+		model.addAttribute("waitlistMessage", waitlistMessage);
 
 		// Send the message via email
 		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
@@ -181,8 +231,11 @@ public class CirculationController {
 				e1.printStackTrace();
 			}
 		}
-
-		return null;
+		
+		UserModel userModel = new UserModel();
+		userModel.setKey("waiting");
+		userModel.setMessage(waitlistMessage);
+		return userModel;
 	}
 
 	@RequestMapping(value = "/return", method = RequestMethod.DELETE)
@@ -227,13 +280,81 @@ public class CirculationController {
 					circulationService.deleteCirculation(circulation);
 
 					// Increment Book number of copies
-					Book book = bookService.findOneBook(returningBooks.get(i));
+					final Book book = bookService.findOneBook(returningBooks.get(i));
 
 					bookListForMessages.add(book);
 					Book temp = new Book();
 					temp.setId(book.getId());
 					temp.setNoOfCopies(book.getNoOfCopies() + 1);
 
+					// Check if there's a waitlist.
+					if (book.getWaitlist().size() > 0) {
+
+
+						// update book status
+						temp.setStatus("hold");
+
+						// Update waitlist
+						List<User> tempUsers = book.getWaitlist();
+						User firstInWaitlist = tempUsers.iterator().next();
+						tempUsers.remove(firstInWaitlist);
+						temp.setWaitlist(tempUsers);
+
+						// Update booksOnHold
+						
+						TimeModel timeModel = (TimeModel)dateService.getTime();
+						final java.sql.Date notifiedDate;
+						if(timeModel != null)
+						{
+							 java.util.Date utilDate = timeModel.getDate();
+							 notifiedDate = new java.sql.Date(utilDate.getTime());
+						}
+						else
+						{
+							notifiedDate = new java.sql.Date(Calendar.getInstance().getTime().getTime());	
+						}
+						
+						/*** SHOUNAK > CHANGE THIS PART **/
+						//final java.sql.Date notifiedDate = new java.sql.Date(Calendar.getInstance().getTime().getTime());
+						firstInWaitlist.setBooksOnHold(new HashMap<Integer, java.sql.Date>()
+														{{put(book.getBookId(), notifiedDate);}});
+						userService.updateBooksOnHold(firstInWaitlist);
+
+						// Generate message
+						String holdMessage = "Your book, " + book.getTitle()
+								+ " is available now. We will hold "
+								+ "the book for 3 days. Please come and "
+								+ "pick it up.\n";
+
+						// Send email
+						JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+						mailSender.setHost("smtp.gmail.com");
+						mailSender.setPort(587);
+						mailSender.setUsername("cmpe275final@gmail.com");
+						mailSender.setPassword("finalproject");
+
+						Properties props = new Properties();
+						props.put("mail.smtp.starttls.enable", "true");
+						mailSender.setJavaMailProperties(props);
+
+						MimeMessage message = mailSender.createMimeMessage();
+						MimeMessageHelper email = new MimeMessageHelper(message);
+						try {
+							email.setTo(firstInWaitlist.getEmailAddress());
+							email.setText(holdMessage);
+							mailSender.send(message);
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+
+					} else { // No waitlist
+
+						// update status
+						temp.setStatus("available");
+
+					}
+
+					// Save
 					bookService.updateBook(temp);
 
 				}
@@ -247,7 +368,7 @@ public class CirculationController {
 				}
 				Calendar calendar = Calendar.getInstance();
 				returnedBookMessage += "Time: " + calendar.getTime();
-				returnedBookMessage += "Thank you for returning the books.";
+				returnedBookMessage += "\n"+ "Thank you for returning the books.";
 
 				// Send email
 				JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
@@ -276,8 +397,14 @@ public class CirculationController {
 	}
 
 	@RequestMapping(value = "/renew", method = RequestMethod.POST)
-	public @ResponseBody List<RenewBooks> extendBook(HttpServletRequest request, HttpServletResponse response,
+//	public @ResponseBody List<RenewBooks> extendBook(HttpServletRequest request, HttpServletResponse response,
+//			Model model) throws Exception {
+	
+	public @ResponseBody String extendBook(HttpServletRequest request, HttpServletResponse response,
 			Model model) throws Exception {
+
+//	public void extendBook(HttpServletRequest request, HttpServletResponse response,
+//			Model model) throws Exception {
 
 		String userEmailAddress = (String) request.getSession().getAttribute("userEmailAddress");
 		User user = userService.getUser(userEmailAddress);
@@ -320,7 +447,21 @@ public class CirculationController {
 
 				} else {
 					circulation.setCountOfRenewal(circulation.getCountOfRenewal() + 1);
-					circulationService.resetCheckoutDate(circulation);
+					TimeModel timeModel = (TimeModel)dateService.getTime();
+					java.sql.Timestamp date;
+					if(timeModel != null)
+					{
+						 java.util.Date utilDate = timeModel.getDate();
+						 date = new java.sql.Timestamp(utilDate.getTime());
+					}
+					else
+					{
+						date = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());	
+					}
+					
+					
+					
+					circulationService.resetCheckoutDate(circulation,date);
 				}
 			}
 
@@ -331,7 +472,21 @@ public class CirculationController {
 				renewableMessage += "Book Title: " + renewableBooks.get(i).getTitle() + "\n" + "Author: "
 						+ renewableBooks.get(i).getAuthor() + "\n\n";
 			}
+			
+			TimeModel timeModel = (TimeModel)dateService.getTime();
+			java.sql.Date date;
+			if(timeModel != null)
+			{
+				 java.util.Date utilDate = timeModel.getDate();
+				 date = new java.sql.Date(utilDate.getTime());
+			}
+			else
+			{
+				date = new java.sql.Date(Calendar.getInstance().getTime().getTime());	
+			}
+			
 			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(date);
 			calendar.add(Calendar.MONTH, 1);
 			String dueDate = new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime());
 			System.out.println(dueDate);
@@ -355,8 +510,8 @@ public class CirculationController {
 			waiting.setRenewableBooks(unrenewableBooks);
 
 			RenewBooks renewcount = new RenewBooks();
-			checkout.setMessageString("renewCountExceedMessage");
-			checkout.setRenewableBooks(renewedCoundExceedBooks);
+			renewcount.setMessageString("renewCountExceedMessage");
+			renewcount.setRenewableBooks(renewedCoundExceedBooks);
 
 			list.add(checkout);
 			list.add(waiting);
@@ -394,7 +549,8 @@ public class CirculationController {
 				e1.printStackTrace();
 			}
 		}
-		return list;
+		
+		return "true";
 	}
 
 }
